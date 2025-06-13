@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <h1>Smart Home</h1>
+                <nav>
+                    <ul class="nav-links">
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#features">Features</a></li>
+                    </ul>
+                </nav>
+            </div>
+            <!-- Weather and Time Display -->
+            <div class="weather-time">
+                <div class="weather-time-content">
+                    <div>
+                        <span>Time:</span>
+                        <span id="current-time"></span>
+                    </div>
+                    <div>
+                        <span>Temperature:</span>
+                        <span id="temperature">25°C</span>
+                    </div>
+                    <div>
+                        <span>Humidity:</span>
+                        <span id="humidity">60%</span>
+                    </div>
+                </div>
+                <p id="errorMessage" class="error-message">Failed to connect to Firebase.</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home">
+        <div class="hero-content">
+            <h2>Welcome to the Future of Smart Home</h2>
+            <p>Discover how Smart House transforms modern living with technology and innovation.</p>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features">
+        <div class="container">
+            <h2>Smart Home Features</h2>
+            <!-- First Row: Time, Temperature, Humidity -->
+            <div class="features-grid">
+                <div class="feature-card" onclick="openTimeModal()">
+                    <h3>Time</h3>
+                    <p>Smart Home clock synchronized in real-time with your local time zone for precise automation and daily routines.</p>
+                </div>
+                <div class="feature-card" onclick="openTemperatureModal()">
+                    <h3>Temperature</h3>
+                    <p>Live temperature monitoring to optimize home comfort and energy efficiency.</p>
+                </div>
+                <div class="feature-card" onclick="openHumidityModal()">
+                    <h3>Humidity</h3>
+                    <p>Advanced humidity tracking to enhance indoor climate control and personal well-being.</p>
+                </div>
+            </div>
+            <!-- Second Row: Call, Speaker, Light -->
+            <div class="features-grid">
+                <div class="feature-card" onclick="openCallModal()">
+                    <h3>Call</h3>
+                    <p>Emergency call system for quick response in smart home environments.</p>
+                </div>
+                <div class="feature-card" onclick="openSpeakerModal()">
+                    <h3>Speaker</h3>
+                    <p>Home announcement system for important notifications and alerts.</p>
+                </div>
+                <div class="feature-card" onclick="openLightModal()">
+                    <h3>Light</h3>
+                    <p>Energy-saving smart lights that keep your home bright and secure.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Time Modal -->
+    <div id="timeModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Home Time</h3>
+            <p id="modal-time"></p>
+            <button onclick="closeTimeModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- Temperature Modal -->
+    <div id="temperatureModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Temperature Chart</h3>
+            <canvas id="temperatureChart"></canvas>
+            <button onclick="closeTemperatureModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- Humidity Modal -->
+    <div id="humidityModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Humidity Chart</h3>
+            <canvas id="humidityChart"></canvas>
+            <button onclick="closeHumidityModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- Call Modal -->
+    <div id="callModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Call System Status</h3>
+            <p>Current Status: <span id="callStatus">OFF</span></p>
+            <div class="modal-buttons">
+                <button onclick="setCallStatus(true)">Turn ON</button>
+                <button onclick="setCallStatus(false)">Turn OFF</button>
+            </div>
+            <button onclick="closeCallModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- Speaker Modal -->
+    <div id="speakerModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Speaker System Status</h3>
+            <p>Current Status: <span id="speakerStatus">OFF</span></p>
+            <div class="modal-buttons">
+                <button onclick="setSpeakerStatus(true)">Turn ON</button>
+                <button onclick="setSpeakerStatus(false)">Turn OFF</button>
+            </div>
+            <button onclick="closeSpeakerModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- Light Modal -->
+    <div id="lightModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Light System Status</h3>
+            <p>Current Status: <span id="lightStatus">OFF</span></p>
+            <div class="modal-buttons">
+                <button onclick="setLightStatus(true)">Turn ON</button>
+                <button onclick="setLightStatus(false)">Turn OFF</button>
+            </div>
+            <button onclick="closeLightModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>© 2025 Smart Home. All rights reserved.</p>
+            <p>
+                Created by:
+                Pham Quoc Thien 
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDmXc6zHfDBcxGlx4V5J-tWW2RB4oS3__Q",
+            authDomain: "smartcity-cfef9.firebaseapp.com",
+            projectId: "smartcity-cfef9",
+            storageBucket: "smartcity-cfef9.firebasestorage.app",
+            messagingSenderId: "755987016720",
+            appId: "1:755987016720:web:c4bff43eefee6266ff2e95",
+            measurementId: "G-K6P1LH3ZD9"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Fetch JSON config data
+        fetch('config.json')
+            .then(response => response.json())
+            .then(config => {
+                // Apply background image from JSON
+                const heroSection = document.getElementById('home');
+                heroSection.style.backgroundImage = `url('${config.backgroundImage}')`;
+            })
+            .catch(error => console.error('Error loading config:', error));
+
+        // Update time every second
+        function updateTime() {
+            const now = new Date();
+            const options = { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit', 
+                hour12: false 
+            };
+            const timeString = now.toLocaleTimeString('en-US', options);
+            document.getElementById('current-time').textContent = timeString;
+            document.getElementById('modal-time').textContent = timeString;
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // Arrays to store historical data for charts
+        let temperatureData = [];
+        let humidityData = [];
+
+        // Fetch weather and system data from Firebase
+        function updateWeatherAndSystems() {
+            const tempRef = database.ref('weather/temperature');
+            const humidityRef = database.ref('weather/humidity');
+            const tempHistoryRef = database.ref('weather/temperatureHistory');
+            const humidityHistoryRef = database.ref('weather/humidityHistory');
+            const callStatusRef = database.ref('call/callStatus');
+            const speakerStatusRef = database.ref('speaker/speakerStatus');
+            const lightStatusRef = database.ref('light/lightStatus');
+            const errorMessage = document.getElementById('errorMessage');
+
+            tempRef.on('value', (snapshot) => {
+                const temperature = snapshot.val();
+                document.getElementById('temperature').textContent = temperature ? `${temperature}°C` : '25°C';
+                errorMessage.classList.add('hidden');
+            }, (error) => {
+                console.error('Error fetching temperature:', error);
+                document.getElementById('temperature').textContent = '25°C';
+                errorMessage.classList.remove('hidden');
+            });
+
+            humidityRef.on('value', (snapshot) => {
+                const humidity = snapshot.val();
+                document.getElementById('humidity').textContent = humidity ? `${humidity}%` : '60%';
+                errorMessage.classList.add('hidden');
+            }, (error) => {
+                console.error('Error fetching humidity:', error);
+                document.getElementById('humidity').textContent = '60%';
+                errorMessage.classList.remove('hidden');
+            });
+
+            tempHistoryRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                temperatureData = data ? Object.values(data).slice(-6) : [22, 23, 25, 26, 24, 23];
+            });
+
+            humidityHistoryRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                humidityData = data ? Object.values(data).slice(-6) : [55, 58, 60, 62, 59, 57];
+            });
+
+            callStatusRef.on('value', (snapshot) => {
+                const callStatus = snapshot.val();
+                document.getElementById('callStatus').textContent = callStatus ? 'ON' : 'OFF';
+                errorMessage.classList.add('hidden');
+            }, (error) => {
+                console.error('Error fetching call status:', error);
+                document.getElementById('callStatus').textContent = 'OFF';
+                errorMessage.classList.remove('hidden');
+            });
+
+            speakerStatusRef.on('value', (snapshot) => {
+                const speakerStatus = snapshot.val();
+                document.getElementById('speakerStatus').textContent = speakerStatus ? 'ON' : 'OFF';
+                errorMessage.classList.add('hidden');
+            }, (error) => {
+                console.error('Error fetching speaker status:', error);
+                document.getElementById('speakerStatus').textContent = 'OFF';
+                errorMessage.classList.remove('hidden');
+            });
+
+            lightStatusRef.on('value', (snapshot) => {
+                const lightStatus = snapshot.val();
+                document.getElementById('lightStatus').textContent = lightStatus ? 'ON' : 'OFF';
+                errorMessage.classList.add('hidden');
+            }, (error) => {
+                console.error('Error fetching light status:', error);
+                document.getElementById('lightStatus').textContent = 'OFF';
+                errorMessage.classList.remove('hidden');
+            });
+        }
+        updateWeatherAndSystems();
+
+        // Functions to set status on Firebase
+        function setCallStatus(status) {
+            database.ref('call/callStatus').set(status)
+                .then(() => console.log(`Call status updated to ${status}`))
+                .catch(error => {
+                    console.error('Error updating call status:', error);
+                    document.getElementById('errorMessage').classList.remove('hidden');
+                });
+        }
+
+        function setSpeakerStatus(status) {
+            database.ref('speaker/speakerStatus').set(status)
+                .then(() => console.log(`Speaker status updated to ${status}`))
+                .catch(error => {
+                    console.error('Error updating speaker status:', error);
+                    document.getElementById('errorMessage').classList.remove('hidden');
+                });
+        }
+
+        function setLightStatus(status) {
+            database.ref('light/lightStatus').set(status)
+                .then(() => console.log(`Light status updated to ${status}`))
+                .catch(error => {
+                    console.error('Error updating light status:', error);
+                    document.getElementById('errorMessage').classList.remove('hidden');
+                });
+        }
+
+        // Modal functions
+        function openTimeModal() {
+            const modal = document.getElementById('timeModal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+        }
+        function closeTimeModal() {
+            const modal = document.getElementById('timeModal');
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+        }
+        function openTemperatureModal() {
+            const modal = document.getElementById('temperatureModal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+            renderTemperatureChart();
+        }
+        function closeTemperatureModal() {
+            const modal = document.getElementById('temperatureModal');
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+        }
+        function openHumidityModal() {
+            const modal = document.getElementById('humidityModal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+            renderHumidityChart();
+        }
+        function closeHumidityModal() {
+            const modal = document.getElementById('humidityModal');
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+        }
+        function openCallModal() {
+            const modal = document.getElementById('callModal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+        }
+        function closeCallModal() {
+            const modal = document.getElementById('callModal');
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+        }
+        function openSpeakerModal() {
+            const modal = document.getElementById('speakerModal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+        }
+        function closeSpeakerModal() {
+            const modal = document.getElementById('speakerModal');
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+        }
+        function openLightModal() {
+            const modal = document.getElementById('lightModal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+        }
+        function closeLightModal() {
+            const modal = document.getElementById('lightModal');
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+        }
+
+        // Render Charts
+        let temperatureChartInstance = null;
+        let humidityChartInstance = null;
+
+       function renderTemperatureChart() {
+
+    const tempText = document.getElementById('temperature').textContent;
+    const currentTemp = parseFloat(tempText);
+    
+    const dataToPlot = temperatureData.slice(-5).concat(currentTemp);
+    
+    const ctx = document.getElementById('temperatureChart').getContext('2d');
+    if (temperatureChartInstance) temperatureChartInstance.destroy();
+    temperatureChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['00:00', '04:00', '08:00', '12:00', '16:00', 'Now'],
+            datasets: [{
+                label: 'Temperature (°C)',
+                data: dataToPlot,
+                borderColor: '#22d3ee',
+                backgroundColor: 'rgba(34, 211, 238, 0.2)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+                options: {
+                    scales: {
+                        y: { beginAtZero: false, ticks: { color: '#e5e7eb' }, grid: { color: '#374151' } },
+                        x: { ticks: { color: '#e5e7eb' }, grid: { color: '#374151' } }
+                    },
+                    plugins: { legend: { labels: { color: '#e5e7eb' } } }
+                }
+            });
+        }
+
+        function renderHumidityChart() {
+            const humText = document.getElementById('humidity').textContent;
+            const currentHum = parseFloat(humText);
+            const dataToPlot = humidityData.slice(-5).concat(currentHum);
+            
+            const ctx = document.getElementById('humidityChart').getContext('2d');
+            if (humidityChartInstance) humidityChartInstance.destroy();
+            humidityChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', 'Now'],
+                    datasets: [{
+                        label: 'Humidity (%)',
+                        data: dataToPlot,
+                        borderColor: '#a78bfa',
+                        backgroundColor: 'rgba(167, 139, 250, 0.2)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: { beginAtZero: false, ticks: { color: '#e5e7eb' }, grid: { color: '#374151' } },
+                        x: { ticks: { color: '#e5e7eb' }, grid: { color: '#374151' } }
+                    },
+                    plugins: { legend: { labels: { color: '#e5e7eb' } } }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
