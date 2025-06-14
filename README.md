@@ -48,6 +48,7 @@ Thông qua việc kết nối các **LED** (đại diện cho các thiết bị 
 
 Bây giờ bạn đã có một hệ thống **nhà thông minh đơn giản** sử dụng ESP8266, giao tiếp **Realtime** với Firebase và Dashboard.
 
+Link dashboard của mình: https://thien2411-vn.github.io/SmartHome_ESP8266/
 ---
 
 ## 📽 Video demo
