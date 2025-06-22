@@ -26,9 +26,12 @@ Thông qua việc kết nối các **LED** (đại diện cho các thiết bị 
 
 ### ☁️ Bước 2: Cấu hình Firebase
 
-1. Tạo một **Realtime Database** mới trên Firebase.
-2. Truy cập vào `Authentication` → Bấm **Start** → Bật **Anonymous**.
-3. Lấy địa chỉ **Firebase Realtime Database URL** và thay vào file `index.html`.
+1. Tạo một **Realtime Database** mới trên Firebase. Ví dụ:
+   
+   ![image](https://github.com/user-attachments/assets/9ecf4578-e305-4126-80d0-371779003ce1)
+
+3. Truy cập vào `Authentication` → Bấm **Start** → Bật **Anonymous**.
+4. Lấy địa chỉ **Firebase Realtime Database URL** và thay vào file `index.html`.
 
 ---
 
